@@ -53,12 +53,10 @@ class DatabaseManager:
         )
 
     def update(self, table_name: str, data: dict[str, str]) -> None:
-        placeholders = (f"{column} = ?" for column in data["columns"])
-        criteria = ", ".join(placeholders)
         self._execute(
             f"""
             UPDATE {table_name}
-            SET {criteria}
+            SET {data['columns']} = ?
             WHERE id = ?;
             """,
             values=(data["new_value"], data["id"]),

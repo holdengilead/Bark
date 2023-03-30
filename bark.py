@@ -1,5 +1,5 @@
 import os
-from typing import Callable
+from typing import Callable, cast
 
 import commands
 
@@ -8,8 +8,8 @@ class Option:
     def __init__(
         self,
         name: str,
-        command,
-        prep_call: Callable[[], dict[str, str] | int] | None = None,
+        command: commands.Command,
+        prep_call: Callable[[], dict[str, str]] | None = None,
     ) -> None:
         self.name = name
         self.command = command
@@ -39,9 +39,9 @@ def get_user_choice(options: dict[str, Option]) -> Option:
 
 
 def get_user_input(label: str, required: bool = True) -> str:
-    value = input(f"{label}: ") or None
+    value = input(f"{label}: ")
     while required and not value:
-        value = input(f"{label} :") or None
+        value = input(f"{label} :")
     return value
 
 
@@ -63,13 +63,13 @@ def get_info_new_bookmark() -> dict[str, str]:
 def get_info_update() -> dict[str, str]:
     return {
         "id": get_user_input("Bookmark ID"),
-        "columns": [get_user_input("Field name")],
+        "columns": get_user_input("Field name"),
         "new_value": get_user_input("New value"),
     }
 
 
-def get_id_to_delete() -> int:
-    return int(get_user_input("id"))
+def get_id_to_delete() -> dict[str, str]:
+    return {"id": get_user_input("id")}
 
 
 def loop(options: dict[str, Option]) -> None:
