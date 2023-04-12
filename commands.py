@@ -39,7 +39,7 @@ class AddBookmarkCommand(Command):
         if "date_added" not in data or data["date_added"] == "":
             data["date_added"] = datetime.utcnow().isoformat()
         db.add("bookmarks", data)
-        return "Bookmark added!"
+        return True, None
 
 
 class ListBookmarksCommand(Command):
@@ -48,7 +48,7 @@ class ListBookmarksCommand(Command):
         self.order_by = order_by
 
     def execute(self, data: dict[str, str] | None = None) -> str:
-        return "\n".join(
+        return True, "\n".join(
             str(bookmark)
             for bookmark in db.select("bookmarks", o_criteria=self.order_by).fetchall()
         )
@@ -57,13 +57,13 @@ class ListBookmarksCommand(Command):
 class DeleteBookmarkCommand(Command):
     def execute(self, data: dict[str, str] | None = None) -> str:
         db.delete("bookmarks", data)
-        return "Bookmark deleted!"
+        return True, None
 
 
 class EditBookmarkCommand(Command):
     def execute(self, data: dict[str, str] | None = None) -> str:
         db.update("bookmarks", data)
-        return "Bookmark updated!"
+        return True, None
 
 
 class ImportGithubStartsCommand(Command):
@@ -91,7 +91,7 @@ class ImportGithubStartsCommand(Command):
                     }
                 )
             i += 1
-        return f"Imported {num_imported} bookmarks from starred repos!"
+        return True, f"Imported {num_imported} bookmarks from starred repos!"
 
 
 class QuitCommand(Command):

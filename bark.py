@@ -1,7 +1,9 @@
 import os
-from typing import Callable, cast
+from typing import Callable
 
 import commands
+
+# TO-DO: Arreglar el choose. Ya no hace falta el if / else en message = ...
 
 
 class Option:
@@ -9,16 +11,21 @@ class Option:
         self,
         name: str,
         command: commands.Command,
+        message: str,
         prep_call: Callable[[], dict[str, str]] | None = None,
     ) -> None:
         self.name = name
         self.command = command
         self.prep_call = prep_call
+        self.message = message
 
     def choose(self) -> None:
         data = self.prep_call() if self.prep_call else None
-        message = self.command.execute(data) if data else self.command.execute()
-        print(message)
+        _, result = self.command.execute(data) if data else self.command.execute()
+        if result:
+            print(result)
+        if self.message:
+            print(self.message)
 
     def __str__(self) -> str:
         return self.name
@@ -88,30 +95,37 @@ if __name__ == "__main__":
             name="Add a bookmark",
             command=commands.AddBookmarkCommand(),
             prep_call=get_info_new_bookmark,
+            message="Bookmark added!",
         ),
         "B": Option(
-            name="List bookmarks by date", command=commands.ListBookmarksCommand()
+            name="List bookmarks by date",
+            command=commands.ListBookmarksCommand(),
+            message="",
         ),
         "T": Option(
             name="List bookmarks by title",
             command=commands.ListBookmarksCommand(order_by="title"),
+            message="",
         ),
         "D": Option(
             name="Delete a bookmark",
             command=commands.DeleteBookmarkCommand(),
             prep_call=get_id_to_delete,
+            message="Bookmark deleted!",
         ),
         "G": Option(
             name="Import GitHub stars",
             command=commands.ImportGithubStartsCommand(),
             prep_call=get_github_import_options,
+            message="",
         ),
         "E": Option(
             name="Update a bookmark",
             command=commands.EditBookmarkCommand(),
             prep_call=get_info_update,
+            message="Bookmark updated!",
         ),
-        "Q": Option(name="Quit", command=commands.QuitCommand()),
+        "Q": Option(name="Quit", command=commands.QuitCommand(), message=""),
     }
 
     while True:
