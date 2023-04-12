@@ -5,9 +5,9 @@ from typing import Callable
 
 import requests as rq
 
-from database import DatabaseManager
+from persistence import BookmarkDatabase
 
-db = DatabaseManager(db_name="bark.db")
+db = BookmarkDatabase()
 
 # TO-DO: Crear un TypedDict (creo que mejor un dataclass) con todos los campos a
 # recibir. Así, data siempre va a ser de ese tipo, y nunca None, evitando muchos fallos
@@ -21,24 +21,11 @@ class Command(ABC):
         raise NotImplementedError
 
 
-class CreateBookmarksTableCommand(Command):
-    def execute(self, data: dict[str, str] | None = None) -> str:
-        columns = {
-            "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
-            "title": "TEXT NOT NULL",
-            "url": "TEXT NOT NULL",
-            "notes": "TEXT",
-            "date_added": "TEXT NOT NULL",
-        }
-        db.create_table("bookmarks", columns=columns)
-        return ""
-
-
 class AddBookmarkCommand(Command):
     def execute(self, data: dict[str, str] | None = None) -> str:
         if "date_added" not in data or data["date_added"] == "":
             data["date_added"] = datetime.utcnow().isoformat()
-        db.add("bookmarks", data)
+        db.create(data)
         return True, None
 
 
@@ -48,21 +35,18 @@ class ListBookmarksCommand(Command):
         self.order_by = order_by
 
     def execute(self, data: dict[str, str] | None = None) -> str:
-        return True, "\n".join(
-            str(bookmark)
-            for bookmark in db.select("bookmarks", o_criteria=self.order_by).fetchall()
-        )
+        return True, "\n".join(str(bookmark) for bookmark in db.list_all(self.order_by))
 
 
 class DeleteBookmarkCommand(Command):
     def execute(self, data: dict[str, str] | None = None) -> str:
-        db.delete("bookmarks", data)
+        db.delete(data)
         return True, None
 
 
 class EditBookmarkCommand(Command):
     def execute(self, data: dict[str, str] | None = None) -> str:
-        db.update("bookmarks", data)
+        db.edit(data["id"], data)
         return True, None
 
 

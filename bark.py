@@ -89,7 +89,7 @@ def loop(options: dict[str, Option]) -> None:
 
 
 if __name__ == "__main__":
-    commands.CreateBookmarksTableCommand().execute()
+    # commands.CreateBookmarksTableCommand().execute()
     options: dict[str, Option] = {
         "A": Option(
             name="Add a bookmark",
